@@ -19,6 +19,7 @@
 
 /* _____________ Your Code Here _____________ */
 
+//BEGIN: 08640 - NumberRange
 type ConcatSingle<T extends string,S>= S extends string ? `${T}${S}` : never;
 type ConcatMulti<T extends string,S>= T extends `${infer Head}${infer Tail}`
   ? ConcatSingle<Head,S> | ConcatMulti<Tail,S>
@@ -31,13 +32,13 @@ type Nines<S extends string> = S extends `${infer _}${infer B}`
   ? `9${Nines<B>}`
   : '';
 
-type NumberRangeOndeSide<Hi extends number | string> = 
+type NumberRangeOneSide<Hi extends number | string> = 
   `${Hi}` extends `${infer A}${infer B}`
-  ? ConcatLessThan<A,NumberRangeOndeSide<Nines<B>>> | ConcatSingle<A,NumberRangeOndeSide<B>>
+  ? ConcatLessThan<A,NumberRangeOneSide<Nines<B>>> | ConcatSingle<A,NumberRangeOneSide<B>>
   : ''
 
 type NumberRangeTwoSides<Lo extends number | string,Hi extends number | string> = 
-  Exclude<NumberRangeOndeSide<Hi>,NumberRangeOndeSide<Lo>>|`${Lo}`;
+  Exclude<NumberRangeOneSide<Hi>,NumberRangeOneSide<Lo>>|`${Lo}`;
 
 type RmZeros<T extends string> = T extends '0'
   ? '0'
@@ -48,29 +49,13 @@ type RmZeros<T extends string> = T extends '0'
 type NumberRange<Lo extends number,Hi extends number> = RmZeros<NumberRangeTwoSides<Lo,Hi>> extends `${infer N extends number}`
   ? N
   : never;
-//END: NumberRange
+//END: 08640 - NumberRange
 
-type A1 = [1,2,3,4,5];
-type Res = Exclude<NumberRange<30,30>,3>;
-type F1<T extends any[], N extends number, Acc extends any[]=[]> = 
-  T extends [infer F, ...infer R]
-  ? Acc['length'] extends Res
-    ? F1<R,N,[...Acc,N]>
-    : F1<R,N,[...Acc,F]>
-  : Acc;
-type Res2 = F1<A1,0>;
-
-//type Fill<
-//  T extends unknown[],
-//  N,
-//  Start extends number = 0,
-//  End extends number = T['length'],
-//> = any
-type Fill<T extends any[], N extends number, Start extends number =0, End extends number = T['length'],Acc extends any[]=[], Range=Exclude<NumberRange<Start,End>,End>> = 
+type Fill<T extends unknown[], N extends any, Start extends number =0, End extends number = T['length'],Acc extends any[]=[], Range=Exclude<NumberRange<Start,End>,End>> = 
   T extends [infer F, ...infer R]
   ? Acc['length'] extends Range
-    ? F1<R,N,[...Acc,N]>
-    : F1<R,N,[...Acc,F]>
+    ? Fill<R,N,Start,End,[...Acc,N],Range>
+    : Fill<R,N,Start,End,[...Acc,F],Range>
   : Acc;
 
 /* _____________ Test Cases _____________ */
