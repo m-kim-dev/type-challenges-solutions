@@ -41,43 +41,41 @@
 
 //type MapTypes<T, R> = any
 
-//type Map1<T extends {[key: string]: any}, R > =
-//  R extends {mapFrom: any, mapTo: any} 
-//  ? 
-
-//type MapTypes<T extends {[key: string]: any}, R extends {mapFrom: any, mapTo: any}> = 
-//  {[K in keyof T]: R['mapFrom'] extends T[K] ? R['mapTo'] : T[K]};
-
+// independently written 
 type MapTypesAux<T extends {[key: string]: any}, R> = 
-R extends infer A
-? A extends {mapFrom: any, mapTo: any}
-? {[K in keyof T]: A['mapFrom'] extends T[K] ? A['mapTo'] : T[K]}
-: never
-: never;
+  R extends infer A
+  ? A extends {mapFrom: any, mapTo: any}
+    ? {[K in keyof T]: A['mapFrom'] extends T[K] ? A['mapTo'] : T[K]}
+    : never
+  : never;
 
-type UnionObj<T extends {[key: string]: unknown}> = Omit<{[K in keyof T]: T[K]},never>;
-
-type Fun<T extends {[key: string]: any}, U extends {[key: string]: any}> = 
+type ExcludeOriginal<T extends {[key: string]: any}, U extends {[key: string]: any}> = 
   {[K in keyof T]: K extends keyof U 
     ? Equal<T[K],U[K]> extends true
       ? T[K]
       : Exclude<T[K],U[K]>
     : never}
-type MapTypes<T extends {[key: string]: any}, R> = Fun<UnionObj<MapTypesAux<T,R>>,T>;
-//type Input1 = { name: string, date: Date };
-//type Input2 = { mapFrom: string, mapTo: Date } | { mapFrom: string, mapTo: null };
-//type Res = MapTypes<Input1,Input2>;
 
-//type MapTypes<T extends {[key: string]: any}, R> = 
-//  R extends {mapFrom: any, mapTo: any} 
-//  ? {[K in keyof T]: R['mapFrom'] extends T[K] ? R['mapTo'] : T[K]}
+type MapTypes<T extends {[key: string]: any}, R> = ExcludeOriginal<Omit<MapTypesAux<T,R>,never>,T>;
+
+// refactored with AI assistance (ChatGPT)
+//type MapTypes<T, R> = {
+//  [K in keyof T]: R extends { mapFrom: infer From; mapTo: infer To }
+//    ? [T[K]] extends [From]
+//      ? To
+//      : never
+//    : never
+//} extends infer Mapped
+//  ? {
+//      [K in keyof Mapped]:
+//        // If multiple mapFrom matched, Mapped[K] is a union of To's
+//        [Mapped[K]] extends [never] 
+//          ?  K extends keyof T ? T[K]  : never
+//          : Mapped[K]
+//    }
 //  : never;
-//type Res1 =  MapTypes<{ date: string }, { mapFrom: string, mapTo: Date } | { mapFrom: string, mapTo: null }>;
-//
-//type Res3 = Omit<UnionObj<Res1>,never>;
-//type Res = MapTypes<Input1, { mapFrom: string, mapTo: boolean } | { mapFrom: Date, mapTo: string }>;
-//type Res4 = Omit<UnionObj<Res>,never>;
-//type Res5 = Fun<Res4,Input1>;
+
+
 /* _____________ Test Cases _____________ */
 import type { Equal, Expect } from '@type-challenges/utils'
 
